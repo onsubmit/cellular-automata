@@ -1,25 +1,32 @@
 type Input<T> = {
-  radius: number;
+  rows: number;
+  columns: number;
   defaultValue: T;
 };
 
 export default class MapGrid<T> {
   private _grid: Map<number, Map<number, T>>;
   private _defaultValue: T;
-  private _radius: number;
+  private _rows: number;
+  private _columns: number;
 
-  constructor({ radius, defaultValue }: Input<T>) {
-    if (radius < 0) {
-      throw new Error('Radius must be a positive integer.');
+  constructor({ rows, columns, defaultValue }: Input<T>) {
+    if (rows < 0) {
+      throw new Error('Rows must be a positive integer.');
+    }
+
+    if (columns < 0) {
+      throw new Error('Columns must be a positive integer.');
     }
 
     this._defaultValue = defaultValue;
-    this._radius = Math.floor(radius);
+    this._rows = Math.floor(rows);
+    this._columns = Math.floor(columns);
 
     this._grid = new Map();
-    for (let r = -radius; r <= radius; r++) {
+    for (let r = 0; r < this._rows; r++) {
       const gridRow = new Map<number, T>();
-      for (let c = -radius; c <= radius; c++) {
+      for (let c = 0; c < this._columns; c++) {
         gridRow.set(c, this._defaultValue);
       }
 
@@ -27,8 +34,12 @@ export default class MapGrid<T> {
     }
   }
 
-  get radius(): number {
-    return this._radius;
+  get rows(): number {
+    return this._rows;
+  }
+
+  get columns(): number {
+    return this._columns;
   }
 
   get = (row: number, column: number): T | undefined => this._grid.get(row)?.get(column);
@@ -46,9 +57,9 @@ export default class MapGrid<T> {
     return element;
   };
 
-  maybeResize = (newRadius: number): boolean => {
-    if (newRadius !== this._radius) {
-      this._resizeGrid(newRadius);
+  maybeResize = (newRows: number, newColumns: number): boolean => {
+    if (newRows !== this._rows && newColumns !== this._columns) {
+      this._resizeGrid(newRows, newColumns);
       return true;
     }
 
@@ -75,48 +86,41 @@ export default class MapGrid<T> {
     gridRow.set(column, value);
   };
 
-  private _resizeGrid = (newRadius: number): void => {
-    const oldRadius = this._radius;
-    this._radius = newRadius;
+  private _resizeGrid = (newRows: number, newColumns: number): void => {
+    const oldRows = this._rows;
+    const oldColumns = this._columns;
 
-    if (newRadius === oldRadius) {
+    this._rows = newRows;
+    this._columns = newColumns;
+
+    if (newRows === oldRows && newColumns === oldColumns) {
       return;
     }
 
-    if (newRadius > oldRadius) {
-      const delta = newRadius - oldRadius;
-
-      const min = Array.from({ length: delta }, (_, i) => -newRadius + i);
-      const max = Array.from({ length: delta }, (_, i) => oldRadius + i + 1);
-      const range = [...min, ...max];
-
-      for (const r of range) {
+    if (newRows > oldRows) {
+      for (let r = oldRows + 1; r < newRows; r++) {
         const gridRow = new Map<number, T>();
-        for (let c = -newRadius; c <= newRadius; c++) {
+        for (let c = 0; c < newColumns; c++) {
           gridRow.set(c, this._defaultValue);
         }
 
         this._grid.set(r, gridRow);
       }
+    } else {
+      for (let r = newRows; r < oldRows; r++) {
+        this._grid.delete(r);
+      }
+    }
 
-      for (const c of range) {
-        for (let r = -newRadius; r < newRadius; r++) {
+    if (newColumns > oldColumns) {
+      for (let r = 0; r < newRows; r++) {
+        for (let c = oldColumns; c < newColumns; c++) {
           this.set(r, c, this._defaultValue);
         }
       }
     } else {
-      const delta = oldRadius - newRadius;
-
-      const min = Array.from({ length: delta }, (_, i) => -oldRadius + i);
-      const max = Array.from({ length: delta }, (_, i) => newRadius + i + 1);
-      const range = [...min, ...max];
-
-      for (const r of range) {
-        this._grid.delete(r);
-      }
-
-      for (const c of range) {
-        for (let r = -oldRadius; r < oldRadius; r++) {
+      for (let r = 0; r < newRows; r++) {
+        for (let c = newColumns; c < oldColumns; c++) {
           this._grid.get(r)?.delete(c);
         }
       }

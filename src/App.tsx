@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import styles from './App.module.css';
-import { CartesianCoordinate } from './canvas';
-import CanvasGrid, { GridCoordinates } from './canvasGrid';
+import CanvasGrid, { CartesianCoordinate, GridCoordinates } from './canvasGrid';
 import { Canvas } from './components/canvas';
 
 type CanvasMouseEvent = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
@@ -25,7 +24,8 @@ function App() {
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
 
   const grid = new CanvasGrid({
-    radius: 20,
+    rows: 1,
+    columns: 8,
     drawCallback: drawAtCoordinate,
     resizeCallback: redraw,
   });
@@ -69,10 +69,10 @@ function App() {
     const { row, column } = gridCoordinates;
     const penAdjustFloor = Math.floor((penSize - 1) / 2);
     const penAdjustCeil = Math.ceil((penSize - 1) / 2);
-    const minRow = Math.max(-grid.radius, row - penAdjustFloor);
-    const minColumn = Math.max(-grid.radius, column - penAdjustFloor);
-    const maxRow = Math.min(row + penAdjustCeil, grid.radius);
-    const maxColumn = Math.min(column + penAdjustCeil, grid.radius);
+    const minRow = Math.max(0, row - penAdjustFloor);
+    const minColumn = Math.max(0, column - penAdjustFloor);
+    const maxRow = Math.min(row + penAdjustCeil, grid.rows);
+    const maxColumn = Math.min(column + penAdjustCeil, grid.columns);
 
     return {
       min: { row: minRow, column: minColumn },
@@ -131,8 +131,8 @@ function App() {
   function mapCanvasCoordinatesToGridCoordinates(
     canvasCoordinates: CartesianCoordinate
   ): GridCoordinates {
-    const row = -grid.radius + canvasCoordinates.y / cellSize;
-    const column = -grid.radius + canvasCoordinates.x / cellSize;
+    const row = canvasCoordinates.y / cellSize;
+    const column = canvasCoordinates.x / cellSize;
 
     return { row, column };
   }
@@ -140,8 +140,8 @@ function App() {
   function mapGridCoordinatesToCanvasCoordinates(
     gridCoordinates: GridCoordinates
   ): CartesianCoordinate {
-    const x = (grid.radius + gridCoordinates.column) * cellSize;
-    const y = (grid.radius + gridCoordinates.row) * cellSize;
+    const x = (grid.columns + gridCoordinates.column) * cellSize;
+    const y = (grid.rows + gridCoordinates.row) * cellSize;
 
     return { x, y };
   }
@@ -167,7 +167,7 @@ function App() {
   }
 
   function getGridSizeInNumCells(): number {
-    return 1 + 2 * grid.radius;
+    return grid.rows + grid.columns;
   }
 
   const size = cellSize * getGridSizeInNumCells();

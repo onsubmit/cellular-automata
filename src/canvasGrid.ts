@@ -3,11 +3,17 @@ import MapGrid from './mapGrid';
 export type GridCoordinates = { row: number; column: number };
 
 export type DrawCallback = (row: number, column: number, value: number) => void;
-export type ResizeCallback = (newRadius: number) => void;
+export type ResizeCallback = (newRows: number, newColumns: number) => void;
 export type DrawExampleFn = (row: number, column: number, gridRadius: number) => number;
 
+export type CartesianCoordinate = {
+  x: number;
+  y: number;
+};
+
 type Input = {
-  radius: number;
+  rows: number;
+  columns: number;
   drawCallback: DrawCallback;
   resizeCallback: ResizeCallback;
 };
@@ -17,19 +23,23 @@ export default class CanvasGrid {
   private _drawCallback: DrawCallback;
   private _resizeCallback: ResizeCallback;
 
-  constructor({ radius, drawCallback, resizeCallback }: Input) {
-    this._grid = new MapGrid<number>({ radius, defaultValue: 0 });
+  constructor({ rows, columns, drawCallback, resizeCallback }: Input) {
+    this._grid = new MapGrid<number>({ rows, columns, defaultValue: 0 });
     this._drawCallback = drawCallback;
     this._resizeCallback = resizeCallback;
   }
 
-  get radius(): number {
-    return this._grid.radius;
+  get rows(): number {
+    return this._grid.rows;
+  }
+
+  get columns(): number {
+    return this._grid.columns;
   }
 
   redraw = () => {
-    for (let row = -this.radius; row <= this.radius; row++) {
-      for (let column = -this.radius; column <= this.radius; column++) {
+    for (let row = 0; row <= this.rows; row++) {
+      for (let column = 0; column <= this.columns; column++) {
         const value = this._grid.getOrThrow(row, column);
         this._drawCallback(row, column, value);
       }
@@ -46,14 +56,14 @@ export default class CanvasGrid {
   };
 
   incrementMaybeResize = (row: number, column: number): number | undefined => {
-    const didResize = this.maybeResize(Math.max(this.radius, Math.abs(row), Math.abs(column)));
+    const didResize = this.maybeResize(Math.max(this.rows, row), Math.max(this.columns, column));
     const value = this.getValueOrThrow(row, column);
 
     const newValue = value + 1;
     this._setValueOrThrow(row, column, newValue);
 
     if (didResize) {
-      this._resizeCallback(this.radius);
+      this._resizeCallback(this.rows, this.columns);
     }
 
     return newValue;
@@ -73,7 +83,8 @@ export default class CanvasGrid {
     this._setValueOrThrow(row, column, 0);
   };
 
-  maybeResize = (newRadius: number) => this._grid.maybeResize(newRadius);
+  maybeResize = (newRows: number, newColumns: number) =>
+    this._grid.maybeResize(newRows, newColumns);
 
   getValueOrThrow = (row: number, column: number): number => this._grid.getOrThrow(row, column);
 

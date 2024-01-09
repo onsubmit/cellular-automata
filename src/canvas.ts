@@ -1,6 +1,6 @@
 export type CartesianCoordinate = { x: number; y: number };
 
-export default class Canvas {
+export class Canvas {
   private _canvas: HTMLCanvasElement;
   private _context: CanvasRenderingContext2D;
   private _size: number;

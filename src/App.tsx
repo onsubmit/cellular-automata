@@ -7,7 +7,7 @@ import { Canvas } from './components/canvas';
 type CanvasMouseEvent = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
 
 function App() {
-  const cellSize = 10;
+  const cellSize = 100;
   const canvasSize = 800;
   const penSize = 1;
   const penWeight = 1;
@@ -128,8 +128,8 @@ function App() {
   function mapGridCoordinatesToCanvasCoordinates(
     gridCoordinates: GridCoordinates
   ): CartesianCoordinate {
-    const x = (grid.columns + gridCoordinates.column) * cellSize;
-    const y = (grid.rows + gridCoordinates.row) * cellSize;
+    const x = gridCoordinates.column * cellSize;
+    const y = gridCoordinates.row * cellSize;
 
     return { x, y };
   }
@@ -154,20 +154,14 @@ function App() {
     return { x, y };
   }
 
-  function getGridSizeInNumCells(): number {
-    return grid.rows + grid.columns;
-  }
-
-  const size = cellSize * getGridSizeInNumCells();
-
   return (
     <div className={styles.app}>
       <h1>Hello World</h1>
       <Canvas
         ref={canvasRef}
-        width={size}
-        height={size}
-        style={{ border: '1px solid white', width: `${size}px`, height: `${size}px` }}
+        width={cellSize * grid.columns}
+        height={cellSize * grid.rows}
+        style={{ border: '1px solid white' }}
         onMouseDown={(e: CanvasMouseEvent) => {
           mouseState.isMouseDown = true;
           mouseState.isMiddleClick = e.button === 1;

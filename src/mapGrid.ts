@@ -58,12 +58,12 @@ export default class MapGrid<T> {
   };
 
   maybeResize = (newRows: number, newColumns: number): boolean => {
-    if (newRows !== this._rows && newColumns !== this._columns) {
-      this._resizeGrid(newRows, newColumns);
-      return true;
+    if (newRows === this._rows && newColumns === this._columns) {
+      return false;
     }
 
-    return false;
+    this._resizeGrid(newRows, newColumns);
+    return true;
   };
 
   set = (row: number, column: number, value: T): void => {
@@ -98,7 +98,7 @@ export default class MapGrid<T> {
     }
 
     if (newRows > oldRows) {
-      for (let r = oldRows + 1; r < newRows; r++) {
+      for (let r = oldRows; r < newRows; r++) {
         const gridRow = new Map<number, T>();
         for (let c = 0; c < newColumns; c++) {
           gridRow.set(c, this._defaultValue);

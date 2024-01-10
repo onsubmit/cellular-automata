@@ -8,7 +8,7 @@ type CanvasMouseEvent = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
 
 function App() {
   const cellSize = 10;
-  let canvasSize = 800;
+  const canvasSize = 800;
   const penSize = 1;
   const penWeight = 1;
   const maxValue = 1;
@@ -27,7 +27,6 @@ function App() {
     rows: 1,
     columns: 8,
     drawCallback: drawAtCoordinate,
-    resizeCallback: redraw,
   });
 
   useEffect(() => {
@@ -49,17 +48,6 @@ function App() {
 
     const { x, y } = mapGridCoordinatesToCanvasCoordinates({ row, column });
     getContext().fillRect(x, y, cellSize, cellSize);
-  }
-
-  function redraw(newRadius: number) {
-    canvasSize = cellSize * (1 + 2 * newRadius);
-    getContext().clearRect(0, 0, canvasSize, canvasSize);
-
-    for (let r = -newRadius; r <= newRadius; r++) {
-      for (let c = -newRadius; c <= newRadius; c++) {
-        drawAtCoordinate(r, c, grid.getValueOrThrow(r, c));
-      }
-    }
   }
 
   function getRangesForPenSize(gridCoordinates: GridCoordinates): {

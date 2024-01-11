@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import Grid from './grid';
 
-describe('MapGrid', () => {
+describe('Grid', () => {
   it('Should create a 1x1 grid', () => {
     const grid = new Grid<number>({ rows: 1, columns: 1, defaultValue: 0 });
     expect(grid.rows).toBe(1);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import Grid from './mapGrid';
+import Grid from './grid';
 
 describe('MapGrid', () => {
   it('Should create a 1x1 grid', () => {

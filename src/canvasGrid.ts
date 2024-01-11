@@ -1,4 +1,4 @@
-import Grid from './mapGrid';
+import Grid from './grid';
 
 export type GridCoordinates = { row: number; column: number };
 

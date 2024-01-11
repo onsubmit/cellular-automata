@@ -5,7 +5,7 @@ type Input<T> = {
 };
 
 export default class MapGrid<T> {
-  private _grid: Map<number, Map<number, T>>;
+  private _grid: Array<Array<T>>;
   private _defaultValue: T;
   private _rows: number;
   private _columns: number;
@@ -23,15 +23,9 @@ export default class MapGrid<T> {
     this._rows = Math.floor(rows);
     this._columns = Math.floor(columns);
 
-    this._grid = new Map();
-    for (let r = 0; r < this._rows; r++) {
-      const gridRow = new Map<number, T>();
-      for (let c = 0; c < this._columns; c++) {
-        gridRow.set(c, this._defaultValue);
-      }
-
-      this._grid.set(r, gridRow);
-    }
+    this._grid = Array.from({ length: this._rows }, () =>
+      Array.from({ length: this._columns }, () => this._defaultValue)
+    );
   }
 
   get rows(): number {
@@ -42,14 +36,14 @@ export default class MapGrid<T> {
     return this._columns;
   }
 
-  get = (row: number, column: number): T | undefined => this._grid.get(row)?.get(column);
+  get = (row: number, column: number): T | undefined => this._grid[row]?.[column];
   getOrThrow = (row: number, column: number): T => {
-    const gridRow = this._grid.get(row);
+    const gridRow = this._grid[row];
     if (!gridRow) {
       throw new Error(`Invalid row: ${row}`);
     }
 
-    const element = gridRow.get(column);
+    const element = gridRow[column];
     if (element === undefined) {
       throw new Error(`Invalid column: ${column}`);
     }
@@ -69,21 +63,24 @@ export default class MapGrid<T> {
   set = (row: number, column: number, value: T): void => {
     // Can't add new rows.
     // Can add new columns.
-    this._grid.get(row)?.set(column, value);
+    const gridRow = this._grid[row];
+    if (gridRow) {
+      gridRow[column] = value;
+    }
   };
 
   setOrThrow = (row: number, column: number, value: T): void => {
-    const gridRow = this._grid.get(row);
+    const gridRow = this._grid[row];
     if (!gridRow) {
       throw new Error(`Invalid row: ${row}`);
     }
 
-    const element = gridRow.get(column);
+    const element = gridRow[column];
     if (element === undefined) {
       throw new Error(`Invalid column: ${column}`);
     }
 
-    gridRow.set(column, value);
+    gridRow[column] = value;
   };
 
   private _resizeGrid = (newRows: number, newColumns: number): void => {
@@ -99,30 +96,21 @@ export default class MapGrid<T> {
 
     if (newRows > oldRows) {
       for (let r = oldRows; r < newRows; r++) {
-        const gridRow = new Map<number, T>();
-        for (let c = 0; c < newColumns; c++) {
-          gridRow.set(c, this._defaultValue);
-        }
-
-        this._grid.set(r, gridRow);
+        this._grid[r] = Array.from({ length: newColumns }, () => this._defaultValue);
       }
     } else {
-      for (let r = newRows; r < oldRows; r++) {
-        this._grid.delete(r);
-      }
+      this._grid.length = newRows;
     }
 
     if (newColumns > oldColumns) {
       for (let r = 0; r < newRows; r++) {
         for (let c = oldColumns; c < newColumns; c++) {
-          this.set(r, c, this._defaultValue);
+          this._grid[r]![c] = this._defaultValue;
         }
       }
     } else {
       for (let r = 0; r < newRows; r++) {
-        for (let c = newColumns; c < oldColumns; c++) {
-          this._grid.get(r)?.delete(c);
-        }
+        this._grid[r]!.length = newColumns;
       }
     }
   };

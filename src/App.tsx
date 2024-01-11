@@ -7,8 +7,7 @@ import { Canvas } from './components/canvas';
 type CanvasMouseEvent = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
 
 function App() {
-  const cellSize = 100;
-  const canvasSize = 800;
+  const cellSize = 64;
   const penSize = 1;
   const penWeight = 1;
   const maxValue = 1;
@@ -47,7 +46,7 @@ function App() {
     getContext().fillStyle = value === 1 ? '#ffffff' : '#242424';
 
     const { x, y } = mapGridCoordinatesToCanvasCoordinates({ row, column });
-    getContext().fillRect(x, y, cellSize, cellSize);
+    getContext().fillRect(x, y, cellSize - 1, cellSize - 1);
   }
 
   function getRangesForPenSize(gridCoordinates: GridCoordinates): {
@@ -145,8 +144,8 @@ function App() {
     x = Math.max(x, 0);
     y = Math.max(y, 0);
 
-    x = Math.min(x, canvasSize - 1);
-    y = Math.min(y, canvasSize - 1);
+    x = Math.min(x, cellSize * grid.columns - 1);
+    y = Math.min(y, cellSize * grid.rows - 1);
 
     x = Math.floor(x / cellSize) * cellSize;
     y = Math.floor(y / cellSize) * cellSize;
@@ -159,9 +158,9 @@ function App() {
       <h1>Hello World</h1>
       <Canvas
         ref={canvasRef}
+        className={styles.grid}
         width={cellSize * grid.columns}
         height={cellSize * grid.rows}
-        style={{ border: '1px solid white' }}
         onMouseDown={(e: CanvasMouseEvent) => {
           mouseState.isMouseDown = true;
           mouseState.isMiddleClick = e.button === 1;

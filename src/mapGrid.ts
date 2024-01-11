@@ -4,7 +4,7 @@ type Input<T> = {
   defaultValue: T;
 };
 
-export default class MapGrid<T> {
+export default class Grid<T> {
   private _grid: Array<Array<T>>;
   private _defaultValue: T;
   private _rows: number;

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import MapGrid from './mapGrid';
+import Grid from './mapGrid';
 
 describe('MapGrid', () => {
   it('Should create a 1x1 grid', () => {
-    const grid = new MapGrid<number>({ rows: 1, columns: 1, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 1, columns: 1, defaultValue: 0 });
     expect(grid.rows).toBe(1);
     expect(grid.columns).toBe(1);
 
@@ -16,7 +16,7 @@ describe('MapGrid', () => {
   });
 
   it('Should create a 2x2 grid', () => {
-    const grid = new MapGrid<number>({ rows: 2, columns: 2, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 2, columns: 2, defaultValue: 0 });
     expect(grid.rows).toBe(2);
     expect(grid.columns).toBe(2);
 
@@ -27,7 +27,7 @@ describe('MapGrid', () => {
   });
 
   it('Should throw when getting values for invalid coordinates', () => {
-    const grid = new MapGrid<number>({ rows: 1, columns: 1, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 1, columns: 1, defaultValue: 0 });
 
     expect(() => grid.getOrThrow(0, 1)).toThrowError('Invalid column: 1');
     expect(() => grid.getOrThrow(1, 0)).toThrowError('Invalid row: 1');
@@ -35,7 +35,7 @@ describe('MapGrid', () => {
   });
 
   it('Should create new columns but not rows when setting values for invalid coordinates', () => {
-    const grid = new MapGrid<number>({ rows: 1, columns: 1, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 1, columns: 1, defaultValue: 0 });
 
     grid.set(1, 1, 1);
     expect(grid.get(1, 1)).toBeUndefined();
@@ -45,7 +45,7 @@ describe('MapGrid', () => {
   });
 
   it('Should throw when setting values for invalid coordinates', () => {
-    const grid = new MapGrid<number>({ rows: 1, columns: 1, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 1, columns: 1, defaultValue: 0 });
 
     expect(() => grid.setOrThrow(0, 1, 1)).toThrowError('Invalid column: 1');
     expect(() => grid.setOrThrow(1, 0, 1)).toThrowError('Invalid row: 1');
@@ -53,7 +53,7 @@ describe('MapGrid', () => {
   });
 
   it('Should not resize if new dimensions are the same as the old ones', () => {
-    const grid = new MapGrid<number>({ rows: 1, columns: 1, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 1, columns: 1, defaultValue: 0 });
 
     expect(grid.maybeResize(1, 1)).toBe(false);
     expect(grid.rows).toBe(1);
@@ -61,7 +61,7 @@ describe('MapGrid', () => {
   });
 
   it('Should expand the rows', () => {
-    const grid = new MapGrid<number>({ rows: 1, columns: 1, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 1, columns: 1, defaultValue: 0 });
 
     expect(grid.rows).toBe(1);
     expect(grid.columns).toBe(1);
@@ -80,7 +80,7 @@ describe('MapGrid', () => {
   });
 
   it('Should expand the columns', () => {
-    const grid = new MapGrid<number>({ rows: 1, columns: 1, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 1, columns: 1, defaultValue: 0 });
 
     expect(grid.rows).toBe(1);
     expect(grid.columns).toBe(1);
@@ -99,7 +99,7 @@ describe('MapGrid', () => {
   });
 
   it('Should expand the rows and columns', () => {
-    const grid = new MapGrid<number>({ rows: 1, columns: 1, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 1, columns: 1, defaultValue: 0 });
 
     expect(grid.rows).toBe(1);
     expect(grid.columns).toBe(1);
@@ -122,7 +122,7 @@ describe('MapGrid', () => {
   });
 
   it('Should expand the rows and shrink the columns', () => {
-    const grid = new MapGrid<number>({ rows: 2, columns: 2, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 2, columns: 2, defaultValue: 0 });
 
     expect(grid.rows).toBe(2);
     expect(grid.columns).toBe(2);
@@ -157,7 +157,7 @@ describe('MapGrid', () => {
   });
 
   it('Should shrink the rows', () => {
-    const grid = new MapGrid<number>({ rows: 2, columns: 2, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 2, columns: 2, defaultValue: 0 });
 
     expect(grid.rows).toBe(2);
     expect(grid.columns).toBe(2);
@@ -182,7 +182,7 @@ describe('MapGrid', () => {
   });
 
   it('Should shrink the columns', () => {
-    const grid = new MapGrid<number>({ rows: 2, columns: 2, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 2, columns: 2, defaultValue: 0 });
 
     expect(grid.rows).toBe(2);
     expect(grid.columns).toBe(2);
@@ -207,7 +207,7 @@ describe('MapGrid', () => {
   });
 
   it('Should shrink the rows and columns', () => {
-    const grid = new MapGrid<number>({ rows: 2, columns: 2, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 2, columns: 2, defaultValue: 0 });
 
     expect(grid.rows).toBe(2);
     expect(grid.columns).toBe(2);
@@ -232,7 +232,7 @@ describe('MapGrid', () => {
   });
 
   it('Should shrink the rows and expand the columns', () => {
-    const grid = new MapGrid<number>({ rows: 2, columns: 2, defaultValue: 0 });
+    const grid = new Grid<number>({ rows: 2, columns: 2, defaultValue: 0 });
 
     expect(grid.rows).toBe(2);
     expect(grid.columns).toBe(2);

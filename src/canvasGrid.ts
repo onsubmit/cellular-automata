@@ -1,4 +1,4 @@
-import MapGrid from './mapGrid';
+import Grid from './mapGrid';
 
 export type GridCoordinates = { row: number; column: number };
 
@@ -20,11 +20,11 @@ type Input = {
 const DEFAULT_VALUE = 0;
 
 export default class CanvasGrid {
-  private _grid: MapGrid<number>;
+  private _grid: Grid<number>;
   private _drawCallback: DrawCallback;
 
   constructor({ rows, columns, drawCallback }: Input) {
-    this._grid = new MapGrid<number>({ rows, columns, defaultValue: DEFAULT_VALUE });
+    this._grid = new Grid<number>({ rows, columns, defaultValue: DEFAULT_VALUE });
     this._drawCallback = drawCallback;
   }
 

@@ -1,28 +1,32 @@
-import { Rule } from './rule';
+import { Rules } from './rules';
 
 export class ElementaryAutomaton {
   private _state: Array<number>;
-  private _rules: Array<Rule>;
+  private readonly _rules: Rules;
 
-  constructor(state: Array<number>, rules: Array<Rule>) {
+  get state(): ReadonlyArray<number> {
+    return this._state;
+  }
+
+  constructor(state: Array<number>, rules: Rules) {
     this._state = state;
     this._rules = rules;
   }
 
-  evolve = (): void => {
-    const state = Array.from({ length: this._state.length }, () => 0);
-    for (let c = 0; c < this._state.length; c++) {
+  evolve = (): this => {
+    const state: Array<number> = [];
+    for (let c = 1 - this._rules.length; c < this._state.length; c++) {
       const pattern: Array<number> = [];
-      for (let i = c - 1; i <= c + 1; i++) {
-        pattern.push(this._state.at(i)!);
+      for (let i = c; i < c + this._rules.length; i++) {
+        pattern.push(this._state[i] ?? 0);
       }
 
-      for (const rule of this._rules) {
-        if (rule.matches(pattern)) {
-          state[c] = 1;
-          break;
-        }
-      }
+      const hasMatch = this._rules.hasMatch(pattern);
+      state.push(hasMatch ? 1 : 0);
     }
+
+    this._state = state;
+
+    return this;
   };
 }

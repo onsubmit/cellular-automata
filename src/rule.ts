@@ -1,8 +1,12 @@
 export class Rule {
-  private _pattern: Array<number>;
+  private readonly _pattern: ReadonlyArray<number>;
 
   constructor(pattern: Array<number>) {
     this._pattern = pattern;
+  }
+
+  get length(): number {
+    return this._pattern.length;
   }
 
   matches = (pattern: Array<number>): boolean => {

@@ -4,7 +4,7 @@ export class ElementaryAutomaton {
   private _state: Array<number>;
   private readonly _rules: Rules;
 
-  get state(): ReadonlyArray<number> {
+  get state(): Array<number> {
     return this._state;
   }
 

@@ -38,17 +38,21 @@ export default class Grid<T> {
 
   get = (row: number, column: number): T | undefined => this._grid[row]?.[column];
   getOrThrow = (row: number, column: number): T => {
-    const gridRow = this._grid[row];
-    if (!gridRow) {
-      throw new Error(`Invalid row: ${row}`);
-    }
-
-    const element = gridRow[column];
+    const element = this.getRowOrThrow(row)[column];
     if (element === undefined) {
       throw new Error(`Invalid column: ${column}`);
     }
 
     return element;
+  };
+
+  getRowOrThrow = (row: number): Array<T> => {
+    const gridRow = this._grid[row];
+    if (!gridRow) {
+      throw new Error(`Invalid row: ${row}`);
+    }
+
+    return gridRow;
   };
 
   maybeResize = (newRows: number, newColumns: number): boolean => {
@@ -70,11 +74,7 @@ export default class Grid<T> {
   };
 
   setOrThrow = (row: number, column: number, value: T): void => {
-    const gridRow = this._grid[row];
-    if (!gridRow) {
-      throw new Error(`Invalid row: ${row}`);
-    }
-
+    const gridRow = this.getRowOrThrow(row);
     const element = gridRow[column];
     if (element === undefined) {
       throw new Error(`Invalid column: ${column}`);

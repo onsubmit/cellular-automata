@@ -3,6 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './App.module.css';
 import CanvasGrid, { CartesianCoordinate, GridCoordinates } from './canvasGrid';
 import { Canvas } from './components/canvas';
+import { ElementaryAutomaton } from './elementaryAutomaton';
+import { Rule } from './rule';
+import { Rules } from './rules';
 
 type CanvasMouseEvent = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
 
@@ -24,8 +27,9 @@ function App() {
 
   const grid = new CanvasGrid({
     rows: 1,
-    columns: 8,
+    columns: 3,
     drawCallback: drawAtCoordinate,
+    resizeCallback: redraw,
   });
 
   useEffect(() => {
@@ -47,6 +51,19 @@ function App() {
 
     const { x, y } = mapGridCoordinatesToCanvasCoordinates({ row, column });
     getContext().fillRect(x, y, cellSize - 1, cellSize - 1);
+  }
+
+  function redraw() {
+    const canvas = canvasRef.current!;
+    canvas.width = cellSize * grid.columns;
+    canvas.height = cellSize * grid.rows;
+    getContext().clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let r = 0; r <= grid.rows; r++) {
+      for (let c = 0; c <= grid.columns; c++) {
+        drawAtCoordinate(r, c, grid.getValueOrThrow(r, c));
+      }
+    }
   }
 
   function getRangesForPenSize(gridCoordinates: GridCoordinates): {
@@ -155,7 +172,23 @@ function App() {
 
   return (
     <div className={styles.app}>
-      <h1>Hello World</h1>
+      <button
+        onClick={() => {
+          const rules = new Rules(
+            new Rule([1, 0, 0]),
+            new Rule([0, 1, 1]),
+            new Rule([0, 1, 0]),
+            new Rule([0, 0, 1])
+          );
+
+          const automaton = new ElementaryAutomaton(grid.getRowOrThrow(0), rules);
+          for (let i = 1; i <= 5; i++) {
+            grid.setRowOrThrow(i, automaton.evolve().state);
+          }
+        }}
+      >
+        Evolve
+      </button>
       <Canvas
         ref={canvasRef}
         className={styles.grid}

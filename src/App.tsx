@@ -10,7 +10,7 @@ import { Rules } from './rules';
 type CanvasMouseEvent = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
 
 function App() {
-  const cellSize = 64;
+  const cellSize = 2;
   const penSize = 1;
   const penWeight = 1;
   const maxValue = 1;
@@ -28,14 +28,18 @@ function App() {
   const grid = new CanvasGrid({
     rows: 1,
     columns: 3,
+    getCellInitialValue: (_, column) => (column === 1 ? 1 : 0),
     drawCallback: drawAtCoordinate,
     resizeCallback: redraw,
   });
 
   useEffect(() => {
-    if (!context && canvasRef.current) {
+    if (context) {
+      redraw();
+    } else if (canvasRef.current) {
       setContext(canvasRef.current.getContext('2d'));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [context]);
 
   const getContext = () => {
@@ -48,9 +52,14 @@ function App() {
 
   function drawAtCoordinate(row: number, column: number, value: number) {
     getContext().fillStyle = value === 1 ? '#ffffff' : '#242424';
+    getContext().strokeStyle = '#000000';
 
     const { x, y } = mapGridCoordinatesToCanvasCoordinates({ row, column });
-    getContext().fillRect(x, y, cellSize - 1, cellSize - 1);
+    getContext().fillRect(x, y, cellSize, cellSize);
+
+    if (value === 1 && cellSize > 3) {
+      getContext().strokeRect(x, y, cellSize, cellSize);
+    }
   }
 
   function redraw() {
@@ -59,8 +68,8 @@ function App() {
     canvas.height = cellSize * grid.rows;
     getContext().clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let r = 0; r <= grid.rows; r++) {
-      for (let c = 0; c <= grid.columns; c++) {
+    for (let r = 0; r < grid.rows; r++) {
+      for (let c = 0; c < grid.columns; c++) {
         drawAtCoordinate(r, c, grid.getValueOrThrow(r, c));
       }
     }
@@ -174,17 +183,24 @@ function App() {
     <div className={styles.app}>
       <button
         onClick={() => {
-          const rules = new Rules(
-            new Rule([1, 0, 0]),
-            new Rule([0, 1, 1]),
-            new Rule([0, 1, 0]),
-            new Rule([0, 0, 1])
-          );
+          const rules = new Rules(new Rule([1, 0, 0]), new Rule([0, 0, 1]));
 
           const automaton = new ElementaryAutomaton(grid.getRowOrThrow(0), rules);
-          for (let i = 1; i <= 5; i++) {
-            grid.setRowOrThrow(i, automaton.evolve().state);
+
+          let i = 1;
+          function loop() {
+            grid.setRowOrThrow(i++, automaton.evolve().state);
+
+            if (i < 256) {
+              requestLoop();
+            }
           }
+
+          function requestLoop() {
+            window.requestAnimationFrame(loop);
+          }
+
+          requestLoop();
         }}
       >
         Evolve

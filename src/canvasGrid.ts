@@ -16,6 +16,7 @@ type Input = {
   columns: number;
   drawCallback: DrawCallback;
   resizeCallback: ResizeCallback;
+  getCellInitialValue?: (row: number, column: number) => number;
 };
 
 const DEFAULT_VALUE = 0;
@@ -25,8 +26,19 @@ export default class CanvasGrid {
   private _drawCallback: DrawCallback;
   private _resizeCallback: ResizeCallback;
 
-  constructor({ rows, columns, drawCallback, resizeCallback }: Input) {
-    this._grid = new Grid<number>({ rows, columns, defaultValue: DEFAULT_VALUE });
+  constructor({
+    rows,
+    columns,
+    drawCallback,
+    resizeCallback,
+    getCellInitialValue = (_row, _column) => DEFAULT_VALUE,
+  }: Input) {
+    this._grid = new Grid<number>({
+      rows,
+      columns,
+      defaultValue: DEFAULT_VALUE,
+      getCellInitialValue,
+    });
     this._drawCallback = drawCallback;
     this._resizeCallback = resizeCallback;
   }
@@ -65,20 +77,21 @@ export default class CanvasGrid {
   getValueOrThrow = (row: number, column: number): number => this._grid.getOrThrow(row, column);
   getRowOrThrow = (row: number): Array<number> => this._grid.getRowOrThrow(row);
   setRowOrThrow = (index: number, row: Array<number>): void => {
-    let didResize = false;
+    let didExpand = false;
     if (index >= this._grid.rows) {
-      didResize = this._grid.maybeResize(index + 1, this._grid.columns);
+      didExpand = this._grid.maybeExpand(index + 1, 0);
     }
 
     if (row.length >= this._grid.columns) {
-      didResize = this._grid.maybeResize(this._grid.rows, row.length) || didResize;
+      const delta = Math.ceil((row.length - this._grid.columns) / 2);
+      didExpand = this._grid.maybeExpand(this._grid.rows, delta) || didExpand;
     }
 
     for (let c = 0; c < this._grid.columns; c++) {
       this._setValueOrThrow(index, c, row[c] ?? DEFAULT_VALUE);
     }
 
-    if (didResize) {
+    if (didExpand) {
       this._resizeCallback();
     }
   };

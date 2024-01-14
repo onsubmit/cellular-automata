@@ -1,3 +1,5 @@
+import memoizee from 'memoizee';
+
 import { Rule } from './rule';
 
 export class Rules {
@@ -11,6 +13,12 @@ export class Rules {
   get length(): number {
     return this._length;
   }
+
+  private static _hasMatch = memoizee(
+    (rules: ReadonlyArray<Rule>, pattern: Array<number>) =>
+      rules.some((rule) => rule.matches(pattern)),
+    { primitive: true }
+  );
 
   constructor(...rules: Array<Rule>) {
     if (rules.length === 0) {
@@ -26,7 +34,7 @@ export class Rules {
     this._length = length;
   }
 
-  hasMatch = (pattern: Array<number>): boolean => this._rules.some((rule) => rule.matches(pattern));
+  hasMatch = (pattern: Array<number>): boolean => Rules._hasMatch(this._rules, pattern);
 
   [Symbol.iterator]() {
     let index = -1;

@@ -4,7 +4,6 @@ export type GridCoordinates = { row: number; column: number };
 
 export type DrawCallback = (row: number, column: number, value: number) => void;
 export type ResizeCallback = () => void;
-export type DrawExampleFn = (row: number, column: number, gridRadius: number) => number;
 
 export type CartesianCoordinate = {
   x: number;
@@ -79,17 +78,18 @@ export default class CanvasGrid {
   setRowOrThrow = (index: number, row: Array<number>): void => {
     let didExpand = false;
     if (index >= this._grid.rows) {
-      didExpand = this._grid.maybeExpand(index + 1, 0);
-    }
-
-    if (row.length >= this._grid.columns) {
+      if (row.length >= this._grid.columns) {
+        const delta = Math.ceil((row.length - this._grid.columns) / 2);
+        didExpand = this._grid.maybeExpand(index + 1, delta);
+      } else {
+        didExpand = this._grid.maybeExpand(index + 1, 0);
+      }
+    } else if (row.length >= this._grid.columns) {
       const delta = Math.ceil((row.length - this._grid.columns) / 2);
-      didExpand = this._grid.maybeExpand(this._grid.rows, delta) || didExpand;
+      didExpand = this._grid.maybeExpand(this._grid.rows, delta);
     }
 
-    for (let c = 0; c < this._grid.columns; c++) {
-      this._setValueOrThrow(index, c, row[c] ?? DEFAULT_VALUE);
-    }
+    this._grid.setRowOrThrow(index, row);
 
     if (didExpand) {
       this._resizeCallback();

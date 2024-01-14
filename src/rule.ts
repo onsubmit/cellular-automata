@@ -1,3 +1,5 @@
+import memoize from 'memoizee';
+
 export class Rule {
   private readonly _pattern: ReadonlyArray<number>;
 
@@ -9,17 +11,22 @@ export class Rule {
     return this._pattern.length;
   }
 
-  matches = (pattern: Array<number>): boolean => {
-    if (this._pattern.length !== pattern.length) {
-      throw new Error('Pattern length mismatch');
-    }
-
-    for (let i = 0; i < this._pattern.length; i++) {
-      if (this._pattern[i] !== pattern[i]) {
-        return false;
+  private static _matches = memoize(
+    (pattern1: ReadonlyArray<number>, pattern2: Array<number>) => {
+      if (pattern1.length !== pattern2.length) {
+        throw new Error('Pattern length mismatch');
       }
-    }
 
-    return true;
-  };
+      for (let i = 0; i < pattern1.length; i++) {
+        if (pattern1[i] !== pattern2[i]) {
+          return false;
+        }
+      }
+
+      return true;
+    },
+    { primitive: true }
+  );
+
+  matches = (pattern: Array<number>): boolean => Rule._matches(this._pattern, pattern);
 }

@@ -61,6 +61,14 @@ export default class Grid<T> {
     return gridRow;
   };
 
+  setRowOrThrow = (index: number, row: Array<T>): void => {
+    if (!this._grid[index]) {
+      throw new Error(`Invalid row: ${index}`);
+    }
+
+    this._grid[index] = row;
+  };
+
   maybeExpand = (newRows: number, numColumnsToExpandBy: number): boolean => {
     if (newRows === this._rows && numColumnsToExpandBy === 0) {
       return false;
@@ -90,28 +98,31 @@ export default class Grid<T> {
   };
 
   private _expandGrid = (newRows: number, numColumnsToExpandBy: number): void => {
-    if (newRows === this._rows && numColumnsToExpandBy === 0) {
+    const oldRows = this._rows;
+
+    if (newRows === oldRows && numColumnsToExpandBy === 0) {
       return;
     }
 
-    const oldRows = this._rows;
+    if (newRows < oldRows || numColumnsToExpandBy < 0) {
+      throw new Error('Can only expand');
+    }
 
     this._rows = newRows;
     this._columns = this._columns + 2 * numColumnsToExpandBy;
 
-    if (newRows > oldRows) {
-      for (let r = oldRows; r < newRows; r++) {
-        this._grid[r] = Array.from({ length: this._columns }, () => this._defaultValue);
-      }
-    } else {
-      this._grid.length = newRows;
+    const newRow = Array.from({ length: this._columns }, () => this._defaultValue);
+    for (let r = oldRows; r < newRows; r++) {
+      this._grid[r] = [...newRow];
     }
 
+    if (numColumnsToExpandBy === 0) {
+      return;
+    }
+
+    const pad = Array.from({ length: numColumnsToExpandBy }, () => this._defaultValue);
     for (let r = 0; r < newRows; r++) {
-      for (let c = 0; c < numColumnsToExpandBy; c++) {
-        this._grid[r]!.unshift(this._defaultValue);
-        this._grid[r]!.push(this._defaultValue);
-      }
+      this._grid[r] = [...pad, ...this._grid[r]!, ...pad];
     }
   };
 }

@@ -20,6 +20,19 @@ export class Rules {
     { primitive: true }
   );
 
+  static from = (ruleNumber: number): Rules => {
+    const rules: Array<Rule> = [];
+
+    const binary = [...ruleNumber.toString(2).padStart(8, '0')].reverse();
+    for (let i = 0; i < binary.length; i++) {
+      if (binary[i] === '1') {
+        rules.push(Rule.from(i));
+      }
+    }
+
+    return new Rules(...rules);
+  };
+
   constructor(...rules: Array<Rule>) {
     if (rules.length === 0) {
       throw new Error('Empty ruleset');

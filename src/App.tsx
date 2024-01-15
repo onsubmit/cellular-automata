@@ -4,7 +4,6 @@ import styles from './App.module.css';
 import CanvasGrid, { CartesianCoordinate, GridCoordinates } from './canvasGrid';
 import { Canvas } from './components/canvas';
 import { ElementaryAutomaton } from './elementaryAutomaton';
-import { Rule } from './rule';
 import { Rules } from './rules';
 
 type CanvasMouseEvent = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
@@ -24,8 +23,10 @@ function App() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
+  const [ruleNumber, setRuleNumber] = useState(30);
+  const [iterations, setIterations] = useState(32);
 
-  const grid = new CanvasGrid({
+  let grid = new CanvasGrid({
     rows: 1,
     columns: 3,
     getCellInitialValue: (_, column) => (column === 1 ? 1 : 0),
@@ -183,7 +184,15 @@ function App() {
     <div className={styles.app}>
       <button
         onClick={() => {
-          const rules = new Rules(new Rule([1, 0, 0]), new Rule([0, 0, 1]));
+          const rules = Rules.from(ruleNumber);
+
+          grid = new CanvasGrid({
+            rows: 1,
+            columns: 3,
+            getCellInitialValue: (_, column) => (column === 1 ? 1 : 0),
+            drawCallback: drawAtCoordinate,
+            resizeCallback: redraw,
+          });
 
           const automaton = new ElementaryAutomaton(grid.getRowOrThrow(0), rules);
 
@@ -191,7 +200,7 @@ function App() {
           function loop() {
             grid.setRowOrThrow(i++, automaton.evolve().state);
 
-            if (i < 256) {
+            if (i < iterations) {
               requestLoop();
             }
           }
@@ -205,6 +214,26 @@ function App() {
       >
         Evolve
       </button>
+      <label>
+        Rule number:
+        <input
+          type="number"
+          defaultValue={ruleNumber}
+          min="0"
+          max="255"
+          onChange={(e) => setRuleNumber(e.target.valueAsNumber)}
+        ></input>
+      </label>
+      <label>
+        Iterations:
+        <input
+          type="number"
+          defaultValue={iterations}
+          min="32"
+          max="256"
+          onChange={(e) => setIterations(e.target.valueAsNumber)}
+        ></input>
+      </label>
       <Canvas
         ref={canvasRef}
         className={styles.grid}

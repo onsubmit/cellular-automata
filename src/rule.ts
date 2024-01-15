@@ -3,6 +3,11 @@ import memoize from 'memoizee';
 export class Rule {
   private readonly _pattern: ReadonlyArray<number>;
 
+  static from = (ruleNumber: number): Rule => {
+    const binary = ruleNumber.toString(2).padStart(3, '0');
+    return new Rule([...binary].map((d) => parseInt(d, 10)));
+  };
+
   constructor(pattern: Array<number>) {
     this._pattern = pattern;
   }

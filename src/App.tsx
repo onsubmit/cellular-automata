@@ -3,14 +3,11 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './App.module.css';
 import CanvasGrid, { CartesianCoordinate, GridCoordinates } from './canvasGrid';
 import { Canvas } from './components/canvas';
-import { ElementaryAutomaton } from './elementaryAutomaton';
-import { Rule } from './rule';
-import { Rules } from './rules';
 
 type CanvasMouseEvent = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
 
 function App() {
-  const cellSize = 2;
+  const cellSize = 4;
   const penSize = 1;
   const penWeight = 1;
   const maxValue = 1;
@@ -26,11 +23,10 @@ function App() {
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
 
   const grid = new CanvasGrid({
-    rows: 1,
-    columns: 3,
-    getCellInitialValue: (_, column) => (column === 1 ? 1 : 0),
+    rows: 100,
+    columns: 100,
+    getCellInitialValue: (_, __) => (Math.random() < 0.5 ? 1 : 0),
     drawCallback: drawAtCoordinate,
-    resizeCallback: redraw,
   });
 
   useEffect(() => {
@@ -179,20 +175,33 @@ function App() {
     return { x, y };
   }
 
+  let previousChangedCells = -1;
+  let loopCount = 0;
+
   return (
     <div className={styles.app}>
       <button
         onClick={() => {
-          const rules = new Rules(new Rule([1, 0, 0]), new Rule([0, 0, 1]));
-
-          const automaton = new ElementaryAutomaton(grid.getRowOrThrow(0), rules);
-
-          let i = 1;
           function loop() {
-            grid.setRowOrThrow(i++, automaton.evolve().state);
+            const changedCells = grid.evolve();
+            redraw();
 
-            if (i < 256) {
-              requestLoop();
+            if (changedCells > 0) {
+              if (previousChangedCells === changedCells) {
+                loopCount++;
+              } else {
+                loopCount = 0;
+              }
+
+              previousChangedCells = changedCells;
+
+              if (loopCount < 10) {
+                requestLoop();
+              } else {
+                console.log('loop found');
+              }
+            } else {
+              console.log('done');
             }
           }
 

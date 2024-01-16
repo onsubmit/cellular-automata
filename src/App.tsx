@@ -3,13 +3,11 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './App.module.css';
 import CanvasGrid, { CartesianCoordinate, GridCoordinates } from './canvasGrid';
 import { Canvas } from './components/canvas';
-import { ElementaryAutomaton } from './elementaryAutomaton';
-import { Rules } from './rules';
 
 type CanvasMouseEvent = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
 
 function App() {
-  const cellSize = 2;
+  const cellSize = 12;
   const penSize = 1;
   const penWeight = 1;
   const maxValue = 1;
@@ -23,15 +21,13 @@ function App() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
-  const [ruleNumber, setRuleNumber] = useState(30);
-  const [iterations, setIterations] = useState(32);
+  const [iterations, setIterations] = useState(0);
 
-  let grid = new CanvasGrid({
-    rows: 1,
-    columns: 3,
-    getCellInitialValue: (_, column) => (column === 1 ? 1 : 0),
+  const grid = new CanvasGrid({
+    rows: 64,
+    columns: 64,
+    getCellInitialValue: (_, __) => (Math.random() < 0.5 ? 1 : 0),
     drawCallback: drawAtCoordinate,
-    resizeCallback: redraw,
   });
 
   useEffect(() => {
@@ -180,28 +176,35 @@ function App() {
     return { x, y };
   }
 
+  let previousChangedCells = -1;
+  let loopCount = 0;
+
   return (
     <div className={styles.app}>
       <button
+        style={{ visibility: iterations ? 'hidden' : 'visible' }}
         onClick={() => {
-          const rules = Rules.from(ruleNumber);
-
-          grid = new CanvasGrid({
-            rows: 1,
-            columns: 3,
-            getCellInitialValue: (_, column) => (column === 1 ? 1 : 0),
-            drawCallback: drawAtCoordinate,
-            resizeCallback: redraw,
-          });
-
-          const automaton = new ElementaryAutomaton(grid.getRowOrThrow(0), rules);
-
-          let i = 1;
           function loop() {
-            grid.setRowOrThrow(i++, automaton.evolve().state);
+            const changedCells = grid.evolve();
+            redraw();
+            setIterations((s) => s + 1);
 
-            if (i < iterations) {
-              requestLoop();
+            if (changedCells > 0) {
+              if (previousChangedCells === changedCells) {
+                loopCount++;
+              } else {
+                loopCount = 0;
+              }
+
+              previousChangedCells = changedCells;
+
+              if (loopCount < 10) {
+                requestLoop();
+              } else {
+                console.log('loop found');
+              }
+            } else {
+              console.log('done');
             }
           }
 
@@ -214,26 +217,6 @@ function App() {
       >
         Evolve
       </button>
-      <label>
-        Rule number:
-        <input
-          type="number"
-          defaultValue={ruleNumber}
-          min="0"
-          max="255"
-          onChange={(e) => setRuleNumber(e.target.valueAsNumber)}
-        ></input>
-      </label>
-      <label>
-        Iterations:
-        <input
-          type="number"
-          defaultValue={iterations}
-          min="32"
-          max="256"
-          onChange={(e) => setIterations(e.target.valueAsNumber)}
-        ></input>
-      </label>
       <Canvas
         ref={canvasRef}
         className={styles.grid}
@@ -277,6 +260,7 @@ function App() {
           e.preventDefault();
         }}
       ></Canvas>
+      <div>Iterations: {iterations}</div>
     </div>
   );
 }

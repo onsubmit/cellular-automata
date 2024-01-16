@@ -5,13 +5,11 @@ import CanvasGrid from './canvasGrid';
 describe('CanvasGrid', () => {
   it('Should create a 1x1 grid', () => {
     const drawCallback = vi.fn();
-    const resizeCallback = vi.fn();
 
     const grid = new CanvasGrid({
       rows: 1,
       columns: 1,
       drawCallback,
-      resizeCallback,
     });
 
     expect(grid.rows).toBe(1);
@@ -24,13 +22,11 @@ describe('CanvasGrid', () => {
 
   it('Should increment a value', () => {
     const drawCallback = vi.fn();
-    const resizeCallback = vi.fn();
 
     const grid = new CanvasGrid({
       rows: 1,
       columns: 1,
       drawCallback,
-      resizeCallback,
     });
 
     expect(grid.getValueOrThrow(0, 0)).toBe(0);
@@ -43,13 +39,11 @@ describe('CanvasGrid', () => {
 
   it('Should decrement a value', () => {
     const drawCallback = vi.fn();
-    const resizeCallback = vi.fn();
 
     const grid = new CanvasGrid({
       rows: 1,
       columns: 1,
       drawCallback,
-      resizeCallback,
     });
 
     expect(grid.getValueOrThrow(0, 0)).toBe(0);
@@ -65,13 +59,11 @@ describe('CanvasGrid', () => {
 
   it('Should reset a value', () => {
     const drawCallback = vi.fn();
-    const resizeCallback = vi.fn();
 
     const grid = new CanvasGrid({
       rows: 1,
       columns: 1,
       drawCallback,
-      resizeCallback,
     });
 
     expect(grid.getValueOrThrow(0, 0)).toBe(0);

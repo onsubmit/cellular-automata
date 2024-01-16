@@ -58,7 +58,7 @@ export class Automaton {
         if (numAlive === 2) {
           changingCells.set({ row, column }, this._grid.getOrThrow(row, column) === ALIVE);
         } else {
-          changingCells.set({ row, column }, numAlive === 3);
+          changingCells.set({ row, column }, numAlive === 1 || numAlive === 3);
         }
       }
     }

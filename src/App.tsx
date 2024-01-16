@@ -7,7 +7,7 @@ import { Canvas } from './components/canvas';
 type CanvasMouseEvent = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
 
 function App() {
-  const cellSize = 4;
+  const cellSize = 12;
   const penSize = 1;
   const penWeight = 1;
   const maxValue = 1;
@@ -21,10 +21,11 @@ function App() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
+  const [iterations, setIterations] = useState(0);
 
   const grid = new CanvasGrid({
-    rows: 100,
-    columns: 100,
+    rows: 64,
+    columns: 64,
     getCellInitialValue: (_, __) => (Math.random() < 0.5 ? 1 : 0),
     drawCallback: drawAtCoordinate,
   });
@@ -181,10 +182,12 @@ function App() {
   return (
     <div className={styles.app}>
       <button
+        style={{ visibility: iterations ? 'hidden' : 'visible' }}
         onClick={() => {
           function loop() {
             const changedCells = grid.evolve();
             redraw();
+            setIterations((s) => s + 1);
 
             if (changedCells > 0) {
               if (previousChangedCells === changedCells) {
@@ -257,6 +260,7 @@ function App() {
           e.preventDefault();
         }}
       ></Canvas>
+      <div>Iterations: {iterations}</div>
     </div>
   );
 }
